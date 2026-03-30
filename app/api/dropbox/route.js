@@ -1,26 +1,18 @@
-// ============================================
-// app/api/dropbox/route.js — API endpoint del catálogo
-// ============================================
-// Se llama desde el frontend para obtener productos
-// Revalida automáticamente según REVALIDATE_SECONDS
-
-import { getCatalog } from "@/lib/dropbox";
+import { getCatalog, refreshCatalog } from "@/lib/dropbox";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const catalog = await getCatalog();
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get("refresh") === "true";
+
+    const catalog = forceRefresh ? await refreshCatalog() : await getCatalog();
 
     return Response.json(catalog, {
-      headers: {
-        "Cache-Control": `s-maxage=${process.env.REVALIDATE_SECONDS || 60}, stale-while-revalidate`,
-      },
+      headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" },
     });
   } catch (error) {
-    return Response.json(
-      { error: error.message, categories: [], products: [] },
-      { status: 500 }
-    );
+    return Response.json({ error: error.message, categories: [], products: [] }, { status: 500 });
   }
 }
