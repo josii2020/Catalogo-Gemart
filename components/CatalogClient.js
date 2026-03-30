@@ -114,19 +114,43 @@ export default function CatalogClient({ initialData }) {
   const cartTotal = cart.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
+  // Generate order link with product data
+  const generateOrderLink = (products) => {
+    const itemData = products.map((p) => ({
+      name: p.name,
+      price: p.price,
+      qty: p.qty || 1,
+      img: p.img,
+      category: p.category,
+      desc: p.desc,
+    }));
+    const encoded = btoa(encodeURIComponent(JSON.stringify(itemData)));
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/pedido?items=${encoded}`;
+  };
+
   // WhatsApp
   const sendProductWA = (p) => {
-    const msg = `¡Hola! Me interesa: *${p.name}*${p.price ? ` — ${formatPrice(p.price)}` : ""}${p.desc ? `\n${p.desc}` : ""}\n\n¿Está disponible?`;
+    const orderLink = generateOrderLink([{ ...p, qty: 1 }]);
+    const msg = `¡Hola! Me interesa: *${p.name}*${p.price ? ` — ${formatPrice(p.price)}` : ""}${p.desc ? `\n${p.desc}` : ""}\n\nVer producto con foto:\n${orderLink}\n\n¿Está disponible?`;
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   const sendCartWA = () => {
+    const orderLink = generateOrderLink(cart);
     const items = cart.map((i) => `• ${i.name} x${i.qty}${i.price ? ` — ${formatPrice(i.price * i.qty)}` : ""}`).join("\n");
-    const msg = `¡Hola! Me interesan estos productos:\n\n${items}${cartTotal ? `\n\nTotal: ${formatPrice(cartTotal)}` : ""}\n\n¿Están disponibles?`;
+    const msg = `¡Hola! Me interesan estos productos:\n\n${items}${cartTotal ? `\n\nTotal: ${formatPrice(cartTotal)}` : ""}\n\nVer pedido con fotos:\n${orderLink}\n\n¿Están disponibles?`;
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
-  const lastSyncTime = data.lastSync ? new Date(data.lastSync).toLocaleTimeString() : null;
+  const [lastSyncTime, setLastSyncTime] = useState(null);
+
+  // Avoid hydration mismatch by setting time only on client
+  useState(() => {
+    if (data.lastSync) {
+      setLastSyncTime(new Date(data.lastSync).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+    }
+  });
 
   return (
     <div className="catalog-root">
