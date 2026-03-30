@@ -90,9 +90,15 @@ export default function CatalogClient({ initialData }) {
 
   // WhatsApp with order link
   const generateOrderLink = (products) => {
-    const itemData = products.map((p) => ({ name: p.name, price: p.price, qty: p.qty || 1, img: p.img, category: p.category, desc: p.desc }));
-    const encoded = btoa(encodeURIComponent(JSON.stringify(itemData)));
-    return `${window.location.origin}/pedido?items=${encoded}`;
+    // Excluir URLs de imágenes del link (son muy largas) - la página de pedido las cargará
+    const itemData = products.map((p) => ({ n: p.name, p: p.price, q: p.qty || 1, c: p.category, d: p.desc || "" }));
+    try {
+      const json = JSON.stringify(itemData);
+      const encoded = btoa(unescape(encodeURIComponent(json)));
+      return `${window.location.origin}/pedido?items=${encoded}`;
+    } catch {
+      return `${window.location.origin}/pedido`;
+    }
   };
 
   const sendProductWA = (p) => {
