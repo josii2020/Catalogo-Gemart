@@ -1,0 +1,22 @@
+{
+  "Anillo Solsticio": {
+    "price": 245000,
+    "desc": "Oro 18k con diamante central"
+  },
+  "Anillo Aurora": {
+    "price": 189000,
+    "desc": "Plata 925 con zirconia"
+  },
+  "Collar Lumière": {
+    "price": 385000,
+    "desc": "Cadena de oro con perla cultivada"
+  },
+  "Pulsera Venezia": {
+    "price": 210000,
+    "desc": "Eslabones de oro italiano"
+  },
+  "Aretes Gota de Luz": {
+    "price": 156000,
+    "desc": "Plata con cristal Swarovski"
+  }
+}
