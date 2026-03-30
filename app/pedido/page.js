@@ -17,16 +17,46 @@ function PedidoContent() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const data = searchParams.get("items");
-      if (data) {
-        const decoded = JSON.parse(decodeURIComponent(atob(data)));
-        setItems(decoded);
+    async function loadItems() {
+      try {
+        const data = searchParams.get("items");
+        if (!data) { setLoaded(true); return; }
+
+        // Decodificar items del URL
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
+
+        // Mapear formato compacto (n,p,q,c,d) a formato completo
+        const parsedItems = decoded.map((item) => ({
+          name: item.n || item.name || "",
+          price: item.p || item.price || null,
+          qty: item.q || item.qty || 1,
+          category: item.c || item.category || "",
+          desc: item.d || item.desc || "",
+          img: item.img || null,
+        }));
+
+        // Intentar cargar imágenes desde el catálogo
+        try {
+          const res = await fetch("/api/dropbox");
+          if (res.ok) {
+            const catalog = await res.json();
+            const products = catalog.products || [];
+            parsedItems.forEach((item) => {
+              if (!item.img) {
+                const match = products.find((p) => p.name === item.name);
+                if (match) item.img = match.img;
+              }
+            });
+          }
+        } catch { /* Si falla, se muestran sin imagen */ }
+
+        setItems(parsedItems);
+      } catch (e) {
+        console.error("Error parsing items:", e);
       }
-    } catch (e) {
-      console.error("Error parsing items:", e);
+      setLoaded(true);
     }
-    setLoaded(true);
+    loadItems();
   }, [searchParams]);
 
   const total = items.reduce((s, i) => s + (i.price || 0) * (i.qty || 1), 0);
