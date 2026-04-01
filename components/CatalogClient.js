@@ -126,8 +126,8 @@ export default function CatalogClient({ initialData }) {
         <div className="header-inner">
           <div className="brand-area">
             <div className="brand-line" />
-            <h1 className="brand">{STORE_NAME}</h1>
-            <p className="tagline">Colección Exclusiva</p>
+            <h1 className="brand">GEMART</h1>
+            <p className="tagline">Joyas & Accesorios · Colección Exclusiva</p>
             <div className="brand-line" />
           </div>
 
@@ -168,7 +168,6 @@ export default function CatalogClient({ initialData }) {
           <img src={data.bannerImg} alt={STORE_NAME} className="hero-img" />
           <div className="hero-overlay">
             <div className="hero-content">
-              <h2 className="hero-title">{STORE_NAME}</h2>
               <p className="hero-subtitle">Elegancia que te define</p>
               <button className="hero-btn" onClick={() => document.querySelector('.main')?.scrollIntoView({ behavior: 'smooth' })}>
                 Explorar Colección
